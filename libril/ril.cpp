@@ -279,6 +279,7 @@ static void dispatchUiccSubscripton(Parcel &p, RequestInfo *pRI);
 static void dispatchSimAuthentication(Parcel &p, RequestInfo *pRI);
 static void dispatchDataProfile(Parcel &p, RequestInfo *pRI);
 static int responseInts(Parcel &p, void *response, size_t responselen);
+static int responseDataRegistrationState(Parcel &p, void *response, size_t responselen);
 static int responseStrings(Parcel &p, void *response, size_t responselen);
 static int responseString(Parcel &p, void *response, size_t responselen);
 static int responseVoid(Parcel &p, void *response, size_t responselen);
@@ -2135,6 +2136,31 @@ responseInts(Parcel &p, void *response, size_t responselen) {
     The parcel will begin with the version */
 static int responseStringsWithVersion(int version, Parcel &p, void *response, size_t responselen) {
     p.writeInt32(version);
+    return responseStrings(p, response, responselen);
+}
+
+static int responseDataRegistrationState(Parcel &p, void *response, size_t responselen) {
+    int numStrings = responselen / sizeof(char *);
+    int forcedTech = 0;
+
+    if (numStrings >= 4 && response != NULL) { /* we are going to modify index 3 */
+        char **p_cur = (char **) response;
+
+        if ( p_cur[3] != NULL && strlen(p_cur[3]) == 2 ) { // p_cur[3] is 3 bytes long
+
+            if (!memcmp("18", p_cur[3], 3)) {
+                forcedTech = RADIO_TECH_HSPAP; // actually RADIO_TECH_DC_HSDPA
+            } else if (!memcmp("19", p_cur[3], 3)) {
+                forcedTech = RADIO_TECH_UMTS; // some variant of 3g?!
+            }
+
+            if (forcedTech) {
+                RLOGI("pabx: forcefully setting radio tech to %d", forcedTech);
+                snprintf(p_cur[3], 3, "%d", forcedTech);
+            }
+        }
+    }
+
     return responseStrings(p, response, responselen);
 }
 
