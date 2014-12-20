@@ -902,6 +902,9 @@ dispatchSIM_IO (Parcel &p, RequestInfo *pRI) {
     // note we only check status at the end
 
     status = p.readInt32(&t);
+
+    simIO.v6.cla = 0;
+
     simIO.v6.command = (int)t;
 
     status = p.readInt32(&t);
