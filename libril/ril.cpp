@@ -2796,6 +2796,9 @@ static int responseCdmaInformationRecords(Parcel &p,
 
 static int responseRilSignalStrength(Parcel &p,
                     void *response, size_t responselen) {
+
+    float qc_sq = 0;
+
     if (response == NULL && responselen != 0) {
         RLOGE("invalid response: NULL");
         return RIL_ERRNO_INVALID_RESPONSE;
@@ -2838,6 +2841,16 @@ static int responseRilSignalStrength(Parcel &p,
                     p_cur->LTE_SignalStrength.cqi = INT_MAX;
                 }
             }
+
+            // Qcoms RIL reports the raw lte value (75..120dbM)
+            // but android expects 44..140dbM
+            qc_sq = (120 - p_cur->LTE_SignalStrength.signalStrength) * 2.22; // signal quality in percent: 0..100
+            if (qc_sq >= 0 && qc_sq <= 100) {
+                p_cur->LTE_SignalStrength.signalStrength = (qc_sq/3.2); // percent to 0..31 range
+                p_cur->LTE_SignalStrength.rsrp = 140-(qc_sq*0.96);      // 44 <-> 140dBm range
+            }
+            // RLOGI("pabx: reporting qc_sq=%.2f, ss=%d, rsrp=%d\n", qc_sq, p_cur->LTE_SignalStrength.signalStrength, p_cur->LTE_SignalStrength.
+
             p.writeInt32(p_cur->LTE_SignalStrength.signalStrength);
             p.writeInt32(p_cur->LTE_SignalStrength.rsrp);
             p.writeInt32(p_cur->LTE_SignalStrength.rsrq);
