@@ -14,3 +14,8 @@
 
 # inherit from qcom-common
 include device/sony/qcom-common/BoardConfigCommon.mk
+
+TARGET_SPECIFIC_HEADER_PATH += device/sony/msm8960-common/include
+
+# RIL
+BOARD_PROVIDES_LIBRIL := true
