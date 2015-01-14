@@ -1832,7 +1832,8 @@ static int responseStringsDataRegistrationState(Parcel &p, void *response, size_
         if (strncmp(p_cur[3], "19", 2) == 0) {
             ALOGE("DATA_REGISTRATION_STATE: stock radioTechnology=19 (QCOM HSPAP_DC) -> CyanogenMod radioTechnology=30 (CM DCHSPAP)");
 #endif
-            strncpy(p_cur[3], "30", 2);
+            //strncpy(p_cur[3], "30", 2); // currently unsupported by CM
+            strncpy(p_cur[3], "15", 2); // 15 = HSPAP
         }
     }
 
