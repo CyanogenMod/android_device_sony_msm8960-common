@@ -17,5 +17,8 @@ include device/sony/qcom-common/BoardConfigCommon.mk
 
 TARGET_SPECIFIC_HEADER_PATH += device/sony/msm8960-common/include
 
+# Bionic
+MALLOC_IMPL := dlmalloc
+
 # RIL
 BOARD_PROVIDES_LIBRIL := true
