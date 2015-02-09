@@ -277,13 +277,9 @@ static void dispatchNVWriteItem(Parcel &p, RequestInfo *pRI);
 static void dispatchUiccSubscripton(Parcel &p, RequestInfo *pRI);
 static void dispatchSimAuthentication(Parcel &p, RequestInfo *pRI);
 static void dispatchDataProfile(Parcel &p, RequestInfo *pRI);
-static void dispatchNetworkManual (Parcel& p, RequestInfo *pRI);
 static int responseInts(Parcel &p, void *response, size_t responselen);
-static int responseString(Parcel &p, void *response, size_t responselen);
 static int responseStrings(Parcel &p, void *response, size_t responselen);
-static int responseStrings(Parcel &p, void *response, size_t responselen, bool network_search);
-static int responseStringsDataRegistrationState(Parcel &p, void *response, size_t responselen);
-static int responseStringsNetworks(Parcel &p, void *response, size_t responselen);
+static int responseString(Parcel &p, void *response, size_t responselen);
 static int responseVoid(Parcel &p, void *response, size_t responselen);
 static int responseCallList(Parcel &p, void *response, size_t responselen);
 static int responseSMS(Parcel &p, void *response, size_t responselen);
@@ -615,54 +611,6 @@ dispatchStrings (Parcel &p, RequestInfo *pRI) {
 
     if (pStrings != NULL) {
         for (int i = 0 ; i < countStrings ; i++) {
-#ifdef MEMSET_FREED
-            memsetString (pStrings[i]);
-#endif
-            free(pStrings[i]);
-        }
-
-#ifdef MEMSET_FREED
-        memset(pStrings, 0, datalen);
-#endif
-    }
-
-    return;
-invalid:
-    invalidCommandBlock(pRI);
-    return;
-}
-
-/** Callee expects const char * */
-static void
-dispatchNetworkManual (Parcel& p, RequestInfo *pRI) {
-    status_t status;
-    size_t datalen;
-    char **pStrings;
-    char *operatorNumericLoc;
-
-    datalen = sizeof(char *) * 2;
-
-    startRequest;
-    pStrings = (char **)alloca(datalen);
-
-    pStrings[0] = strdupReadString(p);
-
-#ifdef RIL_APPEND_RAT_TO_PLMN
-    // Cut off RAT
-    operatorNumericLoc = strchr(pStrings[0], '+');
-    if (operatorNumericLoc != NULL)
-        *operatorNumericLoc = 0;
-#endif
-
-    appendPrintBuf("%s%s,", printBuf, pStrings[0]);
-    pStrings[1] = strdup("NOCHANGE");
-    closeRequest;
-    printRequest(pRI->token, pRI->pCI->requestNumber);
-
-    s_callbacks.onRequest(pRI->pCI->requestNumber, pStrings, datalen, pRI);
-
-    if (pStrings != NULL) {
-        for (int i = 0 ; i < 2 ; i++) {
 #ifdef MEMSET_FREED
             memsetString (pStrings[i]);
 #endif
@@ -2139,16 +2087,6 @@ static int responseStringsWithVersion(int version, Parcel &p, void *response, si
 
 /** response is a char **, pointing to an array of char *'s */
 static int responseStrings(Parcel &p, void *response, size_t responselen) {
-    return responseStrings(p, response, responselen, false);
-}
-
-
-static int responseStringsNetworks(Parcel &p, void *response, size_t responselen) {
-    return responseStrings(p, response, responselen, true);
-}
-
-/** response is a char **, pointing to an array of char *'s */
-static int responseStrings(Parcel &p, void *response, size_t responselen, bool network_search) {
     int numStrings;
 
     if (response == NULL && responselen != 0) {
@@ -2172,31 +2110,8 @@ static int responseStrings(Parcel &p, void *response, size_t responselen, bool n
         /* each string*/
         startResponse;
         for (int i = 0 ; i < numStrings ; i++) {
-#ifdef RIL_APPEND_RAT_TO_PLMN
-            if (network_search == true && (i + 1) % 5 == 3) {
-                RLOGV("Appending 5th network mode string to 3rd");
-
-                char buffer[16]; //PLMN+RAT, shouldn't be longer than 16
-                int network_mode;
-                network_mode = RADIO_TECH_UNKNOWN;
-                if (strcmp(p_cur[i + 2], "gsm") == 0)
-                    network_mode = RADIO_TECH_GSM;
-                else if (strcmp(p_cur[i + 2], "wcdma") == 0)
-                    network_mode = RADIO_TECH_UMTS;
-                else if (strcmp(p_cur[i + 2], "lte") == 0)
-                    network_mode = RADIO_TECH_LTE;
-                sprintf(buffer, "%s+%d", (char*)p_cur[i], network_mode);
-
-                appendPrintBuf("%s%s,", printBuf, buffer);
-                writeStringToParcel (p, buffer);
-            } else {
-                appendPrintBuf("%s%s,", printBuf, (char*)p_cur[i]);
-                writeStringToParcel (p, p_cur[i]);
-            }
-#else
             appendPrintBuf("%s%s,", printBuf, (char*)p_cur[i]);
             writeStringToParcel (p, p_cur[i]);
-#endif
         }
         removeLastChar;
         closeResponse;
@@ -2204,37 +2119,6 @@ static int responseStrings(Parcel &p, void *response, size_t responselen, bool n
     return 0;
 }
 
-/*
- * RIL_RADIO_TECHNOLOGY: 19 (QCOM HSPAP_DC) ==> 30 (CM DCHSPAP)
- */
-static int responseStringsDataRegistrationState(Parcel &p, void *response, size_t responselen) {
-
-    if (response == NULL && responselen != 0) {
-        ALOGE("invalid response: NULL");
-        return RIL_ERRNO_INVALID_RESPONSE;
-    }
-    if (responselen % sizeof(char *) != 0) {
-        ALOGE("invalid response length %d expected multiple of %d\n",
-            (int)responselen, (int)sizeof(char *));
-        return RIL_ERRNO_INVALID_RESPONSE;
-    }
-
-    char **p_cur = (char **) response;
-
-    if (p_cur[3] != NULL) {
-#ifdef RIL_LEGACY_PAP
-        if (strncmp(p_cur[3], "18", 2) == 0) {
-            ALOGE("DATA_REGISTRATION_STATE: stock radioTechnology=18 (QCOM HSPAP_DC) -> CyanogenMod radioTechnology=30 (CM DCHSPAP)");
-#else
-        if (strncmp(p_cur[3], "19", 2) == 0) {
-            ALOGE("DATA_REGISTRATION_STATE: stock radioTechnology=19 (QCOM HSPAP_DC) -> CyanogenMod radioTechnology=30 (CM DCHSPAP)");
-#endif
-            strncpy(p_cur[3], "15", 2);
-        }
-    }
-
-    return responseStrings(p, response, responselen);
-}
 
 /**
  * NULL strings are accepted
