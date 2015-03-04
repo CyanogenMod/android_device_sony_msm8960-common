@@ -19,7 +19,7 @@ COMMON_PATH := device/sony/msm8960-common
 
 # Lights wrapper
 PRODUCT_PACKAGES += \
-    lights.qcom
+    lights.msm8960
 
 # Media profile
 PRODUCT_COPY_FILES += \
