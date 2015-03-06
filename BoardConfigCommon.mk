@@ -22,3 +22,6 @@ MALLOC_IMPL := dlmalloc
 
 # RIL
 BOARD_PROVIDES_LIBRIL := true
+
+# Lights HAL
+TARGET_PROVIDES_LIBLIGHT := true
