@@ -17,6 +17,10 @@ $(call inherit-product, device/sony/qcom-common/qcom-common.mk)
 
 COMMON_PATH := device/sony/msm8960-common
 
+# Camera wrapper
+PRODUCT_PACKAGES += \
+    camera.qcom
+
 # Lights wrapper
 PRODUCT_PACKAGES += \
     lights.msm8960
