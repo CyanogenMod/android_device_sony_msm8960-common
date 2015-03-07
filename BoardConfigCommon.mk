@@ -12,16 +12,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# inherit from qcom-common
-include device/sony/qcom-common/BoardConfigCommon.mk
+TARGET_NO_BOOTLOADER := true
+TARGET_NO_RADIOIMAGE := true
+BOARD_HAS_NO_MISC_PARTITION := true
 
 TARGET_SPECIFIC_HEADER_PATH += device/sony/msm8960-common/include
 
+# Architecture
+TARGET_ARCH := arm
+TARGET_CPU_ABI := armeabi-v7a
+TARGET_CPU_ABI2 := armeabi
+TARGET_ARCH_VARIANT := armv7-a-neon
+
 # Bionic
 MALLOC_IMPL := dlmalloc
+TARGET_USE_QCOM_BIONIC_OPTIMIZATION := true
+
+# Bluetooth
+BOARD_HAVE_BLUETOOTH := true
+
+# Camera
+TARGET_PROVIDES_CAMERA_HAL := true
+
+# Display HAL
+USE_OPENGL_RENDERER := true
+TARGET_USES_ION := true
+TARGET_USES_C2D_COMPOSITION := true
+
+# Power HAL
+TARGET_POWERHAL_VARIANT := qcom
+CM_POWERHAL_EXTENSION := qcom
 
 # RIL
 BOARD_PROVIDES_LIBRIL := true
+BOARD_RIL_CLASS := ../../../device/sony/msm8960-common/ril/
 
 # Lights HAL
 TARGET_PROVIDES_LIBLIGHT := true
