@@ -30,7 +30,6 @@ BOARD_USES_ALSA_AUDIO := true
 
 # Bionic
 MALLOC_IMPL := dlmalloc
-TARGET_USE_QCOM_BIONIC_OPTIMIZATION := true
 
 # Bluetooth
 BOARD_HAVE_BLUETOOTH := true
