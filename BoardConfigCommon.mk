@@ -15,9 +15,6 @@
 # Inherit from Sony common
 include device/sony/common/BoardConfigCommon.mk
 
-# Include path
-TARGET_SPECIFIC_HEADER_PATH += device/sony/msm8960-common/include
-
 # Architecture
 TARGET_ARCH := arm
 TARGET_CPU_ABI := armeabi-v7a
@@ -65,5 +62,4 @@ CM_POWERHAL_EXTENSION := qcom
 BOARD_USES_QCOM_HARDWARE := true
 
 # RIL
-BOARD_PROVIDES_LIBRIL := true
 BOARD_RIL_CLASS := ../../../device/sony/msm8960-common/ril/
