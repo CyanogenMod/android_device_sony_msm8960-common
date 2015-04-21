@@ -63,7 +63,3 @@ CM_POWERHAL_EXTENSION := qcom
 
 # QCOM hardware
 BOARD_USES_QCOM_HARDWARE := true
-
-# RIL
-BOARD_PROVIDES_LIBRIL := true
-BOARD_RIL_CLASS := ../../../device/sony/msm8960-common/ril/
