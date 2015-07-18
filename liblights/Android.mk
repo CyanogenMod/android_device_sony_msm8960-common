@@ -1,6 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
+ifneq ($(TARGET_DEVICE),huashan)
 ifneq ($(strip $(TARGET_DISPLAY_GAMMA_DISABLED)),true)
     LOCAL_CFLAGS += -DENABLE_GAMMA_CORRECTION
 endif
@@ -17,3 +18,4 @@ LOCAL_MODULE := lights.msm8960
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
+endif
