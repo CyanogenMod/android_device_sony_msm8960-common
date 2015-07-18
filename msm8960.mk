@@ -33,8 +33,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.hwc.mdpcomp.enable=true
 
 # Lights wrapper
+ifneq ($(BOARD_VENDOR_PLATFORM),huashan)
 PRODUCT_PACKAGES += \
     lights.msm8960
+endif
 
 # Media profile
 PRODUCT_COPY_FILES += \
