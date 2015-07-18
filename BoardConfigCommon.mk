@@ -48,9 +48,6 @@ TARGET_USES_C2D_COMPOSITION := true
 # Font expansion
 EXTENDED_FONT_FOOTPRINT := true
 
-# Lights HAL
-TARGET_PROVIDES_LIBLIGHT := true
-
 # Platform
 TARGET_BOARD_PLATFORM := msm8960
 
